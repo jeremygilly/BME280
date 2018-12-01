@@ -5,7 +5,7 @@ import digitalio
 import busio
 from time import time, strftime, sleep
 import adafruit_bme280
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 # Create library object using our Bus I2C port
 i2c = busio.I2C(board.SCL,board.SDA)
@@ -19,30 +19,34 @@ bme280.sea_level_pressure = 1013.25
 x = []
 y = []
 
-def write_temp(temp):
-    start_time = strftime("%Y-%m-%d %H:%M:%S")
-    print(start_time)
-    with open("/home/pi/cpu_temp.csv", "a") as log:
-        log.write("{0},{1}\n".format(strftime("%Y-%m-%d %H:%M:%S"),str(temp)))
-
-def graph(temp):
-    y.append(temp)
-    x.append(time())
-    plt.clf()
-    plt.scatter(x,y)
-    plt.plot(x,y)
-    plt.draw()
+#def graph(temp):
+#   y.append(temp)
+#    x.append(time())
+#    plt.clf()
+#    plt.scatter(x,y)
+#    plt.plot(x,y)
+#    plt.draw()
 
 def main():
     start_time = strftime("%Y-%m-%d %H:%M:%S")
     print(start_time)
+    filename = "/home/pi/Desktop/BME280data_" + str(start_time) + ".csv"
+    with open(filename, "a") as log:
+        log.write("BME280 data on (yyyy-mm-dd hh:mm:ss) " + start_time+"\n")
+        log.write("{0}, {1}, {2}, {3}, {4}\n".format("Time","Seconds from Start (s)", "Temperature (C)", "Humidity (%)", "Pressure (hPa)"))
+    seconds_from_start = 0
+    interval = 1
     while True:
-    print("\nTemperature: %0.1f C" % bme280.temperature)
-    print("Humidity: %0.1f %%" % bme280.humidity)
-    print("Pressure: %0.1f hPa" % bme280.pressure)
-    print("Altitude = %0.2f meters" % bme280.altitude)
-    time.sleep(2)
+        time = strftime("%H:%M:%S")
+        temperature = bme280.temperature
+        humidity = bme280.humidity
+        pressure = bme280.pressure
+        with open(filename, "a") as log:
+          log.write("{0}, {1}, {2}, {3}, {4}\n".format(time, seconds_from_start, temperature,humidity,pressure))
+        print(time, seconds_from_start, temperature, humidity, pressure)
+        sleep(interval)
+        seconds_from_start = seconds_from_start + interval
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
